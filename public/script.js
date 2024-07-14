@@ -19,11 +19,13 @@ document.addEventListener("DOMContentLoaded", function () {
     paginationPageSize: 20,
     paginationPageSizeSelector: [10, 20, 30],
     cacheBlockSize: 20,
-    maxBlocksInCache: 0,
+    maxBlocksInCache: 1,
     onPaginationChanged: onPaginationChanged,
     rowModelType: "infinite",
     blockLoadDebounceMillis: false,
     keepDetailRows: false,
+    maxConcurrentDatasourceRequests: 1,
+    infiniteInitialRowCount: 0,
     datasource: {
       getRows: function (params) {
         console.log(JSON.stringify(params, null, 1));
