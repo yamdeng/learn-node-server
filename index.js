@@ -21,6 +21,20 @@ for (let i = 1; i <= 1000; i++) {
   });
 }
 
+app.get("/api/v1/data", (req, res) => {
+  const page = parseInt(req.query.page) || 0;
+  const pageSize = parseInt(req.query.pageSize) || 10;
+
+  const start = page * pageSize;
+  const end = start + pageSize;
+  const rows = data.slice(start, end);
+
+  res.json({
+    rows: rows,
+    total: data.length,
+  });
+});
+
 app.get("/data", (req, res) => {
   const page = parseInt(req.query.page) || 0;
   const pageSize = parseInt(req.query.pageSize) || 10;
