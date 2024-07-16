@@ -22,6 +22,7 @@ async function test() {
     // 템플릿에서 대체할 변수들
     const data = {
       fileName: "AirplaneList",
+      storeName: "airplaneListStore",
       tableColumns: columnList,
     };
 

@@ -27,7 +27,8 @@ const initListData = {
   columns: columns,
 };
 
-const testStore = create<any>((set, get) => ({
+/* zustand store 생성 */
+const airplaneListStore = create<any>((set, get) => ({
   ...createListSlice(set, get),
 
   ...initListData,
@@ -38,7 +39,7 @@ const testStore = create<any>((set, get) => ({
 }));
 
 function AirplaneList() {
-  const state = testStore();
+  const state = airplaneListStore();
   const { search, list, getColumns } = state;
   const columns = getColumns();
 
@@ -53,7 +54,6 @@ function AirplaneList() {
         rowData={list}
         columns={columns}
         store={state}
-        useColumnDynamicSetting
       />
     </>
   );

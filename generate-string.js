@@ -32,7 +32,8 @@ const initListData = {
   columns: columns,
 };
 
-const testStore = create<any>((set, get) => ({
+/* zustand store 생성 */
+const <%= storeName %> = create<any>((set, get) => ({
   ...createListSlice(set, get),
 
   ...initListData,
@@ -43,7 +44,7 @@ const testStore = create<any>((set, get) => ({
 }));
 
 function <%= fileName %>() {
-  const state = testStore();
+  const state = <%= storeName %>();
   const { search, list, getColumns } = state;
   const columns = getColumns();
 
@@ -58,7 +59,6 @@ function <%= fileName %>() {
         rowData={list}
         columns={columns}
         store={state}
-        useColumnDynamicSetting
       />
     </>
   );
@@ -86,6 +86,7 @@ const initFormData = {
   <%= columnInfo.column_name %>: <%- columnInfo.formInitValue %>,<% }) %>
 };
 
+/* zustand store 생성 */
 const <%= fileName %> = create<any>((set, get) => ({
   ...createFormSliceYup(set, get),
 
