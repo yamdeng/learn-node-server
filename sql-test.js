@@ -1,4 +1,5 @@
-const { string1 } = require("./sql-string");
+const { string1, string2 } = require("./sql-string");
+const _ = require("lodash");
 console.log(`string1: ${string1}`);
 const db = require("knex")({
   client: "pg",
@@ -7,7 +8,7 @@ const db = require("knex")({
     host: "127.0.0.1",
     port: 5432,
     user: "postgres",
-    password: "83505269",
+    password: "korea1234",
     database: "postgres",
   },
 });
@@ -22,9 +23,10 @@ async function test() {
     //   "비행기1",
     // ]);
 
-    const users = await db.raw(string1, ["app_airplane", "app_airplane"]);
+    // const users = await db.raw(string1, ["app_airplane", "app_airplane"]);
+    const users = await db.raw(string2, ["app_airplane", "app_airplane"]);
 
-    console.log(`users : ${users}`);
+    console.log(`users : ${_.toString(users.rows)}`);
     // res.json(users);
   } catch (error) {
     console.log(error);
