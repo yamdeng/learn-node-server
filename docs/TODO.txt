@@ -1,0 +1,120 @@
+### 7월16일 TODO ###
+
+#.generator를 위해 사용하는 라이브러리
+ -ant.design의 테이블 : 체크박스 포함
+ -autocomplete 컴포넌트 : 서버 검색을 위한
+  : single 선택임, 선택이 바뀌면 테이블의 메타 정보를 재조회해옴. 체크박스는 전체 체크된 상태
+  : filter해야하는 기본 속성은 서버에서 제어해서 필터해서 줌
+ -선택된 체크박스가 존재시 [다운로드] [파일생성] 버튼이 활성화
+ -어떤 파일을 다운로드하고 생성할지에 대한 구분이 존재 : 'all', 'list', 'form-view', 'form-store'
+
+#.서버 api : 파일 이름은 {TableName}List.tsx, {TableName}Form.tsx, {TableName}FormStore.tsx, {TableName}.zip
+ -메타 테이블 검색 api : api/tables
+ -메타 테이블의 상세 목록 : api/tables/{tableName}/details
+ -api/table/{tableName}/fileDownload get
+  : body 값으로 선택한 체크박스를 전달함
+  : generateType이 'all'인 경우는 zip으로 다운로드
+ -api/table/{tableName}/fileCreate
+ -api/generate-info/{tableName}
+  : 결과값으로 아래와 같이 반환
+   {
+    list: '',
+    form: '',
+    formStroe: ''
+   }
+
+(완료) 1.text에 있는 ejs 단순 기능 확인
+ -file을 기준으로 template이 되는지 확인하기 : 않되면 단순 템플릿 문자열로 처리
+
+(완료) 2.sql을 연동해서 반복을 적용하여 문자열을 추출해보기
+
+(완료) 3.파일 생성시 필요한 sql 목록을 뽑고 별도의 파일로 관리하기
+
+(완료) 4.파일을 현재 폴더 기준으로 result 폴더에 저장하는 소스 구현하기
+
+5.파일 zip해서 다운로드하는 예시 확인하기 : sync로 구현해야 할듯
+
+6.api 목록 추출 : 껍데기
+
+7.api 상세 구현
+
+8.UI 구현
+
+9.테스트
+
+10.변경되는 변수들은 환경변수로 포팅하기
+
+11.여유가 생기면 copy/paste가 되는 3개의 탭으로 소스를 보여주고 COPY/PASTE가 되게끔 만들기
+ -시점은 autocomplete 테이블 변경시
+ -테이블의 체크박스 변경시
+
+
+
+
+
+
+
+
+
+/api/v1/aviation
+/api/v1/industry
+
+
+
+http://aviation:18080/api/v1
+http://localhost:18080/aviation/api/v1
+http://localhost:18080/api/v1/aviation
+
+aviation
+industry
+
+ApiService(path)
+ -VITE_AVIATION_API + '/' + path
+
+AviationApiService(path)
+ -VITE_AVIATION_API + '/' + path
+
+IndustryApiService(path)
+ -VITE_INDUSTRY_API + '/' + path
+
+
+1.결정된 사항
+ -dev 기본 셋팅은 local 설정 파일은 상대 경로로 셋팅
+ -dev:gateway로 설정시에 로컬을 개발환경으로 바라보는 셋팅을 구성
+
+
+
+
+0.기준 url의 마지막은 / 없이 처리
+
+1./api ---> /api/v1
+rewrite: (path) => path.replace(/^\/api/, '/api/v1'),
+
+2./api ---> ''
+rewrite: (path) => path.replace(/^\/api/, ''),
+
+
+
+
+// 되는 버전
+function arrayToTree4(items) {
+  const rootItems = [];
+  const lookup = {};
+  for (const item of items) {
+    const { DEPT_ID, PRNT_ID } = item;
+    if (!lookup[DEPT_ID]) {
+      lookup[DEPT_ID] = { children: [] };
+    }
+    lookup[DEPT_ID] = { ...item, children: lookup[DEPT_ID].children };
+    if (DEPT_ID == '10073') {
+      console.log('pass')
+      rootItems.push(lookup[DEPT_ID]);
+    } else {
+      if (!lookup[PRNT_ID]) {
+        lookup[PRNT_ID] = { children: [] };
+      }
+      lookup[PRNT_ID].children.push(lookup[DEPT_ID]);
+    }
+  }
+  return rootItems;
+}
