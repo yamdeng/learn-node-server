@@ -37,7 +37,7 @@ const testStore = create<any>((set, get) => ({
   },
 }));
 
-function AppTableServerPage2() {
+function AirplaneList() {
   const state = testStore();
   const { search, list, getColumns } = state;
   const columns = getColumns();
@@ -59,4 +59,4 @@ function AppTableServerPage2() {
   );
 }
 
-export default AppTableServerPage2;
+export default AirplaneList;

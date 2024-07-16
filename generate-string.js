@@ -42,7 +42,7 @@ const testStore = create<any>((set, get) => ({
   },
 }));
 
-function AppTableServerPage2() {
+function <%= fileName %>() {
   const state = testStore();
   const { search, list, getColumns } = state;
   const columns = getColumns();
@@ -64,10 +64,51 @@ function AppTableServerPage2() {
   );
 }
 
-export default AppTableServerPage2;
+export default <%= fileName %>;
 `;
+
+const formStoreGenerateString = `
+import { create } from "zustand";
+import { formBaseState, createFormSliceYup } from "@/stores/slice/formSlice";
+import * as yup from "yup";
+
+/* yup validation */
+const yupFormSchema = yup.object({<% tableColumns.forEach((columnInfo)=> { %>
+  <%= columnInfo.column_name %>: yup.<%= columnInfo.yupType %>,<% }) %>
+});
+
+/* form 초기화 */
+const initFormData = {
+  ...formBaseState,
+
+  requiredFields: [<% requiredFieldList.forEach((fieldName)=> { %>"<%= fieldName %>", <% }) %>],
+  <% tableColumns.forEach((columnInfo)=> { %>
+  <%= columnInfo.column_name %>: <%- columnInfo.formInitValue %>,<% }) %>
+};
+
+const <%= fileName %> = create<any>((set, get) => ({
+  ...createFormSliceYup(set, get),
+
+  ...initFormData,
+
+  yupFormSchema: yupFormSchema,
+
+  save: () => {
+    const { validate, getApiParam } = get();
+    if (validate()) {
+      const apiParam = getApiParam();
+    }
+  },
+
+  clear: () => {
+    set(initFormData);
+  },
+}));
+
+export default <%= fileName %>`;
 
 module.exports = {
   testGenerateString: testGenerateString,
   listComponentGenerateString: listComponentGenerateString,
+  formStoreGenerateString: formStoreGenerateString,
 };
