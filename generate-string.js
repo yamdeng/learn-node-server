@@ -128,7 +128,7 @@ function <%= fileName %>() {
     <>
       <div className="grid-one-container">
         <% tableColumns.forEach((columnInfo)=> { %>        
-        <div className="div-label"><%= columnInfo.column_comment %> :</div>
+        <div className="div-label"><%= columnInfo.column_comment %> <% if (columnInfo.is_nullable !== 'YES') { %> <span className="required">*</span> <% } %>:</div>
         <div className="div-input">
           <input
             type="text"

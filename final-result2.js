@@ -1,6 +1,6 @@
 const fs = require("fs");
 const ejs = require("ejs");
-const { string2 } = require("./sql-string");
+const { columnSelectSql } = require("./sql-string");
 const AdmZip = require("adm-zip");
 const db = require("knex")({
   client: "pg",
@@ -17,7 +17,10 @@ const { listComponentGenerateString } = require("./generate-string");
 
 async function test() {
   try {
-    const users = await db.raw(string2, ["app_airplane", "app_airplane"]);
+    const users = await db.raw(columnSelectSql, [
+      "app_airplane",
+      "app_airplane",
+    ]);
     const columnList = users.rows;
 
     // 템플릿에서 대체할 변수들
@@ -47,7 +50,9 @@ async function test() {
 async function createZipArchive() {
   try {
     const zip = new AdmZip();
-    const outputFile = "test.zip";
+    // const outputFile = "test.zip";
+    const outputFile = "./result/test.zip";
+
     // zip.addLocalFile("./result");
     zip.addLocalFile("./result/AirplaneList.tsx");
     // zip.addLocalFile("./result/AirplaneList2.tsx");

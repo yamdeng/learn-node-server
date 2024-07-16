@@ -1,6 +1,6 @@
 const fs = require("fs");
 const ejs = require("ejs");
-const { string2 } = require("./sql-string");
+const { columnSelectSql } = require("./sql-string");
 const db = require("knex")({
   client: "pg",
   version: "7.2",
@@ -16,7 +16,10 @@ const { formViewGenerateString } = require("./generate-string");
 
 async function test() {
   try {
-    const users = await db.raw(string2, ["app_airplane", "app_airplane"]);
+    const users = await db.raw(columnSelectSql, [
+      "app_airplane",
+      "app_airplane",
+    ]);
     const columnList = users.rows;
     // required()
     columnList.map((info) => {

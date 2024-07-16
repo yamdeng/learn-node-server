@@ -1,6 +1,6 @@
 const fs = require("fs");
 const ejs = require("ejs");
-const { string2 } = require("./sql-string");
+const { columnSelectSql } = require("./sql-string");
 const db = require("knex")({
   client: "pg",
   version: "7.2",
@@ -16,7 +16,10 @@ const { listComponentGenerateString } = require("./generate-string");
 
 async function test() {
   try {
-    const users = await db.raw(string2, ["app_airplane", "app_airplane"]);
+    const users = await db.raw(columnSelectSql, [
+      "app_airplane",
+      "app_airplane",
+    ]);
     const columnList = users.rows;
 
     // 템플릿에서 대체할 변수들
@@ -31,12 +34,14 @@ async function test() {
     const content = ejs.render(listComponentGenerateString, data);
 
     // 파일 생성
-    fs.writeFile(`./result/${fileName}.tsx`, content, (err) => {
-      if (err) {
-        return console.error("Error writing file:", err);
-      }
-      console.log("File created successfully!");
-    });
+    // fs.writeFile(`./result/${fileName}.tsx`, content, (err) => {
+    //   if (err) {
+    //     return console.error("Error writing file:", err);
+    //   }
+    //   console.log("File created successfully!");
+    // });
+    fs.writeFileSync(`./result/${fileName}.tsx`, content);
+    console.log("File sync created successfully!");
   } catch (error) {
     console.log(error);
   }

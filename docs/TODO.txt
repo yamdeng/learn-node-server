@@ -32,9 +32,14 @@
 
 (완료) 4.파일을 현재 폴더 기준으로 result 폴더에 저장하는 소스 구현하기
 
-5.파일 zip해서 다운로드하는 예시 확인하기 : sync로 구현해야 할듯
+(완료) 5.파일 zip해서 다운로드하는 예시 확인하기 : sync로 구현해야 할듯
 
 6.api 목록 추출 : 껍데기
+ -api/tables
+ -api/tables/{tableName}/details
+ -api/table/{tableName}/fileDownload
+ -api/table/{tableName}/fileCreate
+ -api/generate-info/{tableName}
 
 7.api 상세 구현
 
