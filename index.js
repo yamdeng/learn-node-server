@@ -51,8 +51,8 @@ app.get("/api/tables", async (req, res) => {
 });
 
 // 테이블명 기준으로 컬럼 정보 조회 : /api/columns
-app.get("/api/columns", async (req, res) => {
-  const tableName = req.query.tableName;
+app.get("/api/columns/:tableName", async (req, res) => {
+  const tableName = req.params.tableName;
   let columnList = [];
   try {
     const dbResponse = await db.raw(columnSelectSql, [tableName, tableName]);
@@ -71,14 +71,25 @@ app.get("/api/columns", async (req, res) => {
 app.get(
   "/api/generate/:tableName/:generateType/fileCreate",
   async (req, res) => {
-    // TODO : querystring으로 적용할 컬럼 목록 전달하기
     const tableName = req.params.tableName;
     const generateType = req.params.generateType || "all"; // all, list, formStore, formView
-    const requestColumnList = [];
+    const checkedColumns = req.query.checkedColumns || [];
     let columnList = [];
     try {
       const dbResponse = await db.raw(columnSelectSql, [tableName, tableName]);
-      columnList = dbResponse.rows;
+      columnList = dbResponse.rows.filter((info) => {
+        if (checkedColumns.length) {
+          const searchIndex = checkedColumns.findIndex(
+            (checkedColumnName) =>
+              checkedColumnName === info.column_name_original
+          );
+          if (searchIndex !== -1) {
+            return true;
+          }
+        } else {
+          return true;
+        }
+      });
       if (generateType === "all") {
         createListfile(tableName, columnList);
         createFormStorefile(tableName, columnList);
@@ -105,15 +116,26 @@ app.get(
 app.get(
   "/api/generate/:tableName/:generateType/fileDownload",
   async (req, res) => {
-    // TODO : querystring으로 적용할 컬럼 목록 전달하기
     const tableName = req.params.tableName;
     const generateType = req.params.generateType || "all"; // all, list, formStore, formView
-    const requestColumnList = [];
+    const checkedColumns = req.query.checkedColumns || [];
     let columnList = [];
     let downloadFileName = "";
     try {
       const dbResponse = await db.raw(columnSelectSql, [tableName, tableName]);
-      columnList = dbResponse.rows;
+      columnList = dbResponse.rows.filter((info) => {
+        if (checkedColumns.length) {
+          const searchIndex = checkedColumns.findIndex(
+            (checkedColumnName) =>
+              checkedColumnName === info.column_name_original
+          );
+          if (searchIndex !== -1) {
+            return true;
+          }
+        } else {
+          return true;
+        }
+      });
       let listFileName = "";
       let formStoreFileName = "";
       let formViewFileName = "";
@@ -122,12 +144,14 @@ app.get(
         if (generateType === "list") {
           downloadFileName = listFileName;
         }
-      } else if (generateType === "all" || generateType === "formStore") {
+      }
+      if (generateType === "all" || generateType === "formStore") {
         formStoreFileName = await createFormStorefile(tableName, columnList);
         if (generateType === "formStore") {
           downloadFileName = formStoreFileName;
         }
-      } else if (generateType === "all" || generateType === "formView") {
+      }
+      if (generateType === "all" || generateType === "formView") {
         formViewFileName = await createFormViewfile(tableName, columnList);
         if (generateType === "formView") {
           downloadFileName = formViewFileName;
@@ -153,9 +177,21 @@ app.get("/api/generate/:tableName", async (req, res) => {
   const tableName = req.params.tableName;
   let columnList = [];
   let result = {};
+  const checkedColumns = req.query.checkedColumns || [];
   try {
     const dbResponse = await db.raw(columnSelectSql, [tableName, tableName]);
-    columnList = dbResponse.rows;
+    columnList = dbResponse.rows.filter((info) => {
+      if (checkedColumns.length) {
+        const searchIndex = checkedColumns.findIndex(
+          (checkedColumnName) => checkedColumnName === info.column_name_original
+        );
+        if (searchIndex !== -1) {
+          return true;
+        }
+      } else {
+        return true;
+      }
+    });
 
     columnList.map((info) => {
       let yupType = "string";
