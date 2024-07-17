@@ -1,11 +1,11 @@
+import { Button, Flex, Select, Table, Tabs } from "antd";
+import axios from "axios";
 import { useState } from "react";
-import { Table, Flex, Button, Select, Tabs } from "antd";
+import { CopyToClipboard } from "react-copy-to-clipboard";
+import AsyncSelect from "react-select/async";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { darcula } from "react-syntax-highlighter/dist/esm/styles/prism";
 import "./App.css";
-import AsyncSelect from "react-select/async";
-import axios from "axios";
-import { CopyToClipboard } from "react-copy-to-clipboard";
 
 const getQueryStringByArray = (parameterName, arr) => {
   let result = "";
@@ -28,7 +28,7 @@ const getQueryStringByArray = (parameterName, arr) => {
 const loadOptions = (inputValue, callback) => {
   console.log("on load options function");
   axios
-    .get(`http://localhost:3000/api/tables`, {
+    .get(`/api/tables`, {
       params: {
         keyword: inputValue,
       },
@@ -156,7 +156,7 @@ function App() {
     setSelectTableName(optionInfo.value);
 
     axios
-      .get(`http://localhost:3000/api/columns/${optionInfo.value}`, {
+      .get(`/api/columns/${optionInfo.value}`, {
         params: {},
       })
       .then((response) => {
@@ -170,7 +170,7 @@ function App() {
   const fileCreate = () => {
     axios
       .get(
-        `http://localhost:3000/api/generate/${selectTableName}/${selectGenerateType}/fileCreate`,
+        `/api/generate/${selectTableName}/${selectGenerateType}/fileCreate`,
         {
           params: {
             checkedColumns: selectedRowKeys,
@@ -187,9 +187,13 @@ function App() {
       "checkedColumns",
       selectedRowKeys
     );
-    window.open(
-      `http://localhost:3000/api/generate/${selectTableName}/${selectGenerateType}/fileDownload${checkedColumnParameters}`
-    );
+    const mode = import.meta.env.MODE;
+    let downloadUrl = `http://localhost:3000/api/generate/${selectTableName}/${selectGenerateType}/fileDownload${checkedColumnParameters}`;
+    if (mode === "production") {
+      downloadUrl = `/api/generate/${selectTableName}/${selectGenerateType}/fileDownload${checkedColumnParameters}`;
+    }
+
+    window.open(downloadUrl);
   };
 
   const changeGenerateType = (value) => {
@@ -198,7 +202,7 @@ function App() {
 
   const refreshSource = () => {
     axios
-      .get(`http://localhost:3000/api/generate/${selectTableName}`, {
+      .get(`/api/generate/${selectTableName}`, {
         params: {
           checkedColumns: selectedRowKeys,
         },
