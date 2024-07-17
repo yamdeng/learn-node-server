@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { Table, Flex, Button, Select } from "antd";
+import { Table, Flex, Button, Select, Tabs } from "antd";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { darcula } from "react-syntax-highlighter/dist/esm/styles/prism";
 import "./App.css";
 import AsyncSelect from "react-select/async";
 import axios from "axios";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 
 const getQueryStringByArray = (parameterName, arr) => {
   let result = "";
@@ -48,6 +51,97 @@ function App() {
   const [selectGenerateType, setSelectGenerateType] = useState("all");
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [columnList, setColumnList] = useState([]);
+
+  const [activeTabKey, setActiveTabKey] = useState("1");
+  const [listSourceContent, setListSourceContent] = useState("");
+  const [formStoreSourceContent, setFormStoreSourceContent] = useState("");
+  const [formViewSourceContent, setFormViewSourceContent] = useState("");
+
+  const tabItems = [
+    {
+      key: "1",
+      label: "목록",
+      children: (
+        <>
+          <CopyToClipboard
+            text={listSourceContent}
+            onCopy={() => alert("클립보드 복사 완료")}
+          >
+            <div style={{ textAlign: "left" }}>
+              <Button type="primary" danger>
+                복사
+              </Button>
+            </div>
+          </CopyToClipboard>
+          <SyntaxHighlighter
+            language="javascript"
+            style={darcula}
+            showLineNumbers
+            wrapLongLines
+          >
+            {listSourceContent}
+          </SyntaxHighlighter>
+        </>
+      ),
+    },
+    {
+      key: "2",
+      label: "form-store",
+      children: (
+        <>
+          <CopyToClipboard
+            text={formStoreSourceContent}
+            onCopy={() => alert("클립보드 복사 완료")}
+          >
+            <div style={{ textAlign: "left" }}>
+              <Button type="primary" danger>
+                복사
+              </Button>
+            </div>
+          </CopyToClipboard>
+          <SyntaxHighlighter
+            language="javascript"
+            style={darcula}
+            showLineNumbers
+            wrapLongLines
+          >
+            {formStoreSourceContent}
+          </SyntaxHighlighter>
+        </>
+      ),
+    },
+    {
+      key: "3",
+      label: "form-view",
+      children: (
+        <>
+          <CopyToClipboard
+            text={formViewSourceContent}
+            onCopy={() => alert("클립보드 복사 완료")}
+          >
+            <div style={{ textAlign: "left" }}>
+              <Button type="primary" danger>
+                복사
+              </Button>
+            </div>
+          </CopyToClipboard>
+          <SyntaxHighlighter
+            language="javascript"
+            style={darcula}
+            showLineNumbers
+            wrapLongLines
+          >
+            {formViewSourceContent}
+          </SyntaxHighlighter>
+        </>
+      ),
+    },
+  ];
+
+  const onTabChange = (key) => {
+    console.log(key);
+    setActiveTabKey(key);
+  };
 
   const onSelectChange = (newSelectedRowKeys) => {
     console.log("selectedRowKeys changed: ", newSelectedRowKeys);
@@ -100,6 +194,23 @@ function App() {
 
   const changeGenerateType = (value) => {
     setSelectGenerateType(value);
+  };
+
+  const refreshSource = () => {
+    axios
+      .get(`http://localhost:3000/api/generate/${selectTableName}`, {
+        params: {
+          checkedColumns: selectedRowKeys,
+        },
+      })
+      .then((response) => {
+        const sourceInfo = response.data;
+        const { listComponentContent, formStoreContent, formViewContent } =
+          sourceInfo;
+        setListSourceContent(listComponentContent);
+        setFormStoreSourceContent(formStoreContent);
+        setFormViewSourceContent(formViewContent);
+      });
   };
 
   const columns = [
@@ -170,9 +281,10 @@ function App() {
           <Button
             type="primary"
             danger
+            onClick={refreshSource}
             disabled={!selectTableName || !selectedRowKeys.length}
           >
-            재조회
+            소스조회
           </Button>
         </Flex>
         <Table
@@ -181,6 +293,11 @@ function App() {
           dataSource={columnList}
           columns={columns}
           pagination={false}
+        />
+        <Tabs
+          activeKey={activeTabKey}
+          items={tabItems}
+          onChange={onTabChange}
         />
       </div>
     </>
