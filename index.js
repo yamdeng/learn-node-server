@@ -1,4 +1,3 @@
-// -api/generate-info/{tableName}
 const _ = require("lodash");
 const ejs = require("ejs");
 const fs = require("fs");
@@ -74,16 +73,23 @@ app.get(
   async (req, res) => {
     // TODO : querystring으로 적용할 컬럼 목록 전달하기
     const tableName = req.params.tableName;
-    const generateType = req.params.generateType; // all, list, formStore, formView
+    const generateType = req.params.generateType || "all"; // all, list, formStore, formView
     const requestColumnList = [];
     let columnList = [];
     try {
       const dbResponse = await db.raw(columnSelectSql, [tableName, tableName]);
       columnList = dbResponse.rows;
-      // TODO : filter 필요
-      createListfile(tableName, columnList);
-      createFormStorefile(tableName, columnList);
-      createFormViewfile(tableName, columnList);
+      if (generateType === "all") {
+        createListfile(tableName, columnList);
+        createFormStorefile(tableName, columnList);
+        createFormViewfile(tableName, columnList);
+      } else if (generateType === "list") {
+        createListfile(tableName, columnList);
+      } else if (generateType === "formStore") {
+        createFormStorefile(tableName, columnList);
+      } else if (generateType === "formView") {
+        createFormViewfile(tableName, columnList);
+      }
       console.log(columnList);
     } catch (e) {
       console.log(e);
@@ -101,25 +107,39 @@ app.get(
   async (req, res) => {
     // TODO : querystring으로 적용할 컬럼 목록 전달하기
     const tableName = req.params.tableName;
-    const generateType = req.params.generateType; // all, list, formStore, formView
+    const generateType = req.params.generateType || "all"; // all, list, formStore, formView
     const requestColumnList = [];
     let columnList = [];
     let downloadFileName = "";
     try {
       const dbResponse = await db.raw(columnSelectSql, [tableName, tableName]);
       columnList = dbResponse.rows;
-      // TODO : filter 필요
-      const listFileName = await createListfile(tableName, columnList);
-      const formStoreFileName = await createFormStorefile(
-        tableName,
-        columnList
-      );
-      const formViewFileName = await createFormViewfile(tableName, columnList);
-      downloadFileName = await createZipArchive(tableName, [
-        listFileName,
-        formStoreFileName,
-        formViewFileName,
-      ]);
+      let listFileName = "";
+      let formStoreFileName = "";
+      let formViewFileName = "";
+      if (generateType === "all" || generateType === "list") {
+        listFileName = await createListfile(tableName, columnList);
+        if (generateType === "list") {
+          downloadFileName = listFileName;
+        }
+      } else if (generateType === "all" || generateType === "formStore") {
+        formStoreFileName = await createFormStorefile(tableName, columnList);
+        if (generateType === "formStore") {
+          downloadFileName = formStoreFileName;
+        }
+      } else if (generateType === "all" || generateType === "formView") {
+        formViewFileName = await createFormViewfile(tableName, columnList);
+        if (generateType === "formView") {
+          downloadFileName = formViewFileName;
+        }
+      }
+      if (generateType === "all") {
+        downloadFileName = await createZipArchive(tableName, [
+          listFileName,
+          formStoreFileName,
+          formViewFileName,
+        ]);
+      }
     } catch (e) {
       console.log(e);
     }
@@ -127,6 +147,72 @@ app.get(
     res.download(downloadFileName);
   }
 );
+
+// generate 문자열 반환 : /api/generate/:tableName
+app.get("/api/generate/:tableName", async (req, res) => {
+  const tableName = req.params.tableName;
+  let columnList = [];
+  let result = {};
+  try {
+    const dbResponse = await db.raw(columnSelectSql, [tableName, tableName]);
+    columnList = dbResponse.rows;
+
+    columnList.map((info) => {
+      let yupType = "string";
+      let formInitValue = '""';
+      if (info.java_type === "Double" || info.java_type === "Long") {
+        yupType = "number";
+        formInitValue = "null";
+      } else if (info.java_type === "Boolean") {
+        yupType = "boolean";
+        formInitValue = "false";
+      }
+      info.yupType =
+        yupType + "()" + (info.is_nullable === "YES" ? ".required()" : "");
+      info.formInitValue = formInitValue;
+      return info;
+    });
+
+    const requiredFields = columnList
+      .filter((info) => info.is_nullable !== "YES")
+      .map((info) => info.column_name);
+
+    let fileName = _.camelCase(tableName);
+    const applyFileName = fileName.charAt(0).toUpperCase() + fileName.slice(1);
+    const listData = {
+      fileName: `${applyFileName}List`,
+      storeName: `${applyFileName}ListStore`,
+      tableColumns: columnList,
+    };
+    const listComponentContent = ejs.render(
+      listComponentGenerateString,
+      listData
+    );
+
+    const formStoreData = {
+      fileName: `use${applyFileName}FormStore`,
+      requiredFieldList: requiredFields,
+      tableColumns: columnList,
+    };
+
+    const formStoreContent = ejs.render(formStoreGenerateString, formStoreData);
+
+    const formViewData = {
+      fileName: `${applyFileName}Form`,
+      storeName: `use${applyFileName}FormStore`,
+      tableColumns: columnList,
+    };
+
+    const formViewContent = ejs.render(formViewGenerateString, formViewData);
+    result.listComponentContent = listComponentContent;
+    result.formStoreContent = formStoreContent;
+    result.formViewContent = formViewContent;
+  } catch (e) {
+    console.log(e);
+  }
+
+  res.json(result);
+});
 
 // 테이블 목록 파일 생성
 async function createListfile(tableName, columnList) {
