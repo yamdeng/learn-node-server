@@ -1,3 +1,4 @@
+require("dotenv").config();
 const _ = require("lodash");
 const ejs = require("ejs");
 const fs = require("fs");
@@ -8,22 +9,26 @@ const {
   formStoreGenerateString,
   formViewGenerateString,
 } = require("./generate-string");
+
+const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_DATABASE, SERVER_PORT } =
+  process.env;
+
 const db = require("knex")({
   client: "pg",
   version: "7.2",
   connection: {
-    host: "127.0.0.1",
-    port: 5432,
-    user: "postgres",
-    password: "korea1234",
-    database: "postgres",
+    host: DB_HOST,
+    port: DB_PORT,
+    user: DB_USER,
+    password: DB_PASSWORD,
+    database: DB_DATABASE,
   },
 });
 
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const port = 3000;
+const port = SERVER_PORT;
 app.use(
   cors({
     origin: "*", // 모든 출처 허용 옵션. true 를 써도 된다.
