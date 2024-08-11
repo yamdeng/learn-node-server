@@ -412,6 +412,8 @@ function App() {
               { value: "formStore", label: "form store" },
               { value: "formView", label: "form view" },
               { value: "detailView", label: "detail view" },
+              { value: "modalForm", label: "modal form" },
+              { value: "modalView", label: "modal view" },
             ]}
           />
           <Button
