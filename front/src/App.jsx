@@ -447,13 +447,19 @@ function App() {
             소스조회
           </Button>
           <Checkbox
-            onChange={(checekd) => setCheckedMultiColumn(checekd)}
+            onChange={(event) => {
+              const checked = event.target.checked;
+              setCheckedMultiColumn(checked);
+            }}
             value={checkedMultiColumn}
           >
             2열 반영
           </Checkbox>
           <Checkbox
-            onChange={(checekd) => setCheckedModalUseState(checekd)}
+            onChange={(event) => {
+              const checked = event.target.checked;
+              setCheckedModalUseState(checked);
+            }}
             value={checkedModalUseState}
           >
             모달 useState 적용
