@@ -404,7 +404,7 @@ function App() {
         return (
           <Select
             value={componentType}
-            style={{ width: 120 }}
+            style={{ width: 150 }}
             onChange={(value) => changeComponentType(index, value)}
             options={componentTypeOptions}
           />
