@@ -279,6 +279,12 @@ function App() {
         setColumnList(list);
         const tableCheckKeyList = list.map((info) => info.column_name_original);
         setSelectedRowKeys(tableCheckKeyList);
+        setListSourceContent("");
+        setFormStoreSourceContent("");
+        setFormViewSourceContent("");
+        setDetailViewSourceContent("");
+        setModalFormSourceContent("");
+        setModalViewSourceContent("");
       });
   };
 
