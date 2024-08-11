@@ -1,4 +1,4 @@
-import { Button, Flex, Select, Table, Tabs, Checkbox } from "antd";
+import { Button, Flex, Select, Table, Tabs, Checkbox, Input } from "antd";
 import axios from "axios";
 import { useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
@@ -102,11 +102,11 @@ function App() {
         <>
           <CopyToClipboard
             text={listSourceContent}
-            onCopy={() => alert("클립보드 복사 완료")}
+            onCopy={() => alert("목록 복사 완료")}
           >
             <div style={{ textAlign: "left" }}>
               <Button type="primary" danger>
-                복사
+                목록 복사
               </Button>
             </div>
           </CopyToClipboard>
@@ -123,16 +123,16 @@ function App() {
     },
     {
       key: "2",
-      label: "form-store",
+      label: "폼(store)",
       children: (
         <>
           <CopyToClipboard
             text={formStoreSourceContent}
-            onCopy={() => alert("클립보드 복사 완료")}
+            onCopy={() => alert("폼(store) 복사 완료")}
           >
             <div style={{ textAlign: "left" }}>
               <Button type="primary" danger>
-                복사
+                폼(store) 복사
               </Button>
             </div>
           </CopyToClipboard>
@@ -149,16 +149,16 @@ function App() {
     },
     {
       key: "3",
-      label: "form-view",
+      label: "폼(화면)",
       children: (
         <>
           <CopyToClipboard
             text={formViewSourceContent}
-            onCopy={() => alert("클립보드 복사 완료")}
+            onCopy={() => alert("폼(화면) 복사 완료")}
           >
             <div style={{ textAlign: "left" }}>
               <Button type="primary" danger>
-                복사
+                폼(화면) 복사
               </Button>
             </div>
           </CopyToClipboard>
@@ -175,16 +175,16 @@ function App() {
     },
     {
       key: "4",
-      label: "detail-view",
+      label: "상세(화면)",
       children: (
         <>
           <CopyToClipboard
             text={detailViewSourceContent}
-            onCopy={() => alert("클립보드 복사 완료")}
+            onCopy={() => alert("상세(화면) 복사 복사 완료")}
           >
             <div style={{ textAlign: "left" }}>
               <Button type="primary" danger>
-                복사
+                상세(화면) 복사
               </Button>
             </div>
           </CopyToClipboard>
@@ -201,16 +201,16 @@ function App() {
     },
     {
       key: "5",
-      label: "modal-form",
+      label: "모달폼(화면)",
       children: (
         <>
           <CopyToClipboard
             text={modalFormSourceContent}
-            onCopy={() => alert("클립보드 복사 완료")}
+            onCopy={() => alert("모달폼(화면) 복사 완료")}
           >
             <div style={{ textAlign: "left" }}>
               <Button type="primary" danger>
-                복사
+                모달폼(화면) 복사
               </Button>
             </div>
           </CopyToClipboard>
@@ -227,16 +227,16 @@ function App() {
     },
     {
       key: "6",
-      label: "modal-view",
+      label: "모달상세(화면)",
       children: (
         <>
           <CopyToClipboard
             text={modalViewSourceContent}
-            onCopy={() => alert("클립보드 복사 완료")}
+            onCopy={() => alert("모달상세(화면) 복사 완료")}
           >
             <div style={{ textAlign: "left" }}>
               <Button type="primary" danger>
-                복사
+                모달상세(화면) 복사
               </Button>
             </div>
           </CopyToClipboard>
@@ -363,6 +363,12 @@ function App() {
     });
   };
 
+  const changeCodeGroupId = (index, value) => {
+    setColumnList((draft) => {
+      draft[index].codeGroupId = value;
+    });
+  };
+
   const columns = [
     {
       title: "컬럼명",
@@ -401,6 +407,22 @@ function App() {
             style={{ width: 120 }}
             onChange={(value) => changeComponentType(index, value)}
             options={componentTypeOptions}
+          />
+        );
+      },
+    },
+    {
+      title: "코드그룹ID",
+      dataIndex: "codeGroupId",
+      key: "codeGroupId",
+      render: (_, record, index) => {
+        const { codeGroupId, componentType } = record;
+        return (
+          <Input
+            value={codeGroupId}
+            style={{ width: 120 }}
+            onChange={(value) => changeCodeGroupId(index, value)}
+            disabled={componentType !== "code"}
           />
         );
       },
