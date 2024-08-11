@@ -421,7 +421,7 @@ function App() {
           <Input
             value={codeGroupId}
             style={{ width: 120 }}
-            onChange={(value) => changeCodeGroupId(index, value)}
+            onChange={(event) => changeCodeGroupId(index, event.target.value)}
             disabled={componentType !== "code"}
           />
         );
