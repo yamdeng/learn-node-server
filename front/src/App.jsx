@@ -56,6 +56,7 @@ function App() {
   const [listSourceContent, setListSourceContent] = useState("");
   const [formStoreSourceContent, setFormStoreSourceContent] = useState("");
   const [formViewSourceContent, setFormViewSourceContent] = useState("");
+  const [detailViewSourceContent, setDetailViewSourceContent] = useState("");
 
   const tabItems = [
     {
@@ -136,6 +137,32 @@ function App() {
         </>
       ),
     },
+    {
+      key: "4",
+      label: "detail-view",
+      children: (
+        <>
+          <CopyToClipboard
+            text={detailViewSourceContent}
+            onCopy={() => alert("클립보드 복사 완료")}
+          >
+            <div style={{ textAlign: "left" }}>
+              <Button type="primary" danger>
+                복사
+              </Button>
+            </div>
+          </CopyToClipboard>
+          <SyntaxHighlighter
+            language="javascript"
+            style={darcula}
+            showLineNumbers
+            wrapLongLines
+          >
+            {detailViewSourceContent}
+          </SyntaxHighlighter>
+        </>
+      ),
+    },
   ];
 
   const onTabChange = (key) => {
@@ -209,11 +236,16 @@ function App() {
       })
       .then((response) => {
         const sourceInfo = response.data;
-        const { listComponentContent, formStoreContent, formViewContent } =
-          sourceInfo;
+        const {
+          listComponentContent,
+          formStoreContent,
+          formViewContent,
+          detailViewContent,
+        } = sourceInfo;
         setListSourceContent(listComponentContent);
         setFormStoreSourceContent(formStoreContent);
         setFormViewSourceContent(formViewContent);
+        setDetailViewSourceContent(detailViewContent);
       });
   };
 
@@ -264,6 +296,7 @@ function App() {
               { value: "list", label: "목록" },
               { value: "formStore", label: "form store" },
               { value: "formView", label: "form view" },
+              { value: "detailView", label: "detail view" },
             ]}
           />
           <Button
