@@ -74,7 +74,10 @@ function App() {
   const [formStoreSourceContent, setFormStoreSourceContent] = useState("");
   const [formViewSourceContent, setFormViewSourceContent] = useState("");
   const [detailViewSourceContent, setDetailViewSourceContent] = useState("");
+  const [modalFormSourceContent, setModalFormSourceContent] = useState("");
+  const [modalViewSourceContent, setModalViewSourceContent] = useState("");
   const [checkedMultiColumn, setCheckedMultiColumn] = useState(false);
+  const [checkedModalUseState, setCheckedModalUseState] = useState(false);
 
   const tabItems = [
     {
@@ -181,6 +184,58 @@ function App() {
         </>
       ),
     },
+    {
+      key: "5",
+      label: "modal-form",
+      children: (
+        <>
+          <CopyToClipboard
+            text={modalFormSourceContent}
+            onCopy={() => alert("클립보드 복사 완료")}
+          >
+            <div style={{ textAlign: "left" }}>
+              <Button type="primary" danger>
+                복사
+              </Button>
+            </div>
+          </CopyToClipboard>
+          <SyntaxHighlighter
+            language="javascript"
+            style={darcula}
+            showLineNumbers
+            wrapLongLines
+          >
+            {modalFormSourceContent}
+          </SyntaxHighlighter>
+        </>
+      ),
+    },
+    {
+      key: "6",
+      label: "modal-view",
+      children: (
+        <>
+          <CopyToClipboard
+            text={modalViewSourceContent}
+            onCopy={() => alert("클립보드 복사 완료")}
+          >
+            <div style={{ textAlign: "left" }}>
+              <Button type="primary" danger>
+                복사
+              </Button>
+            </div>
+          </CopyToClipboard>
+          <SyntaxHighlighter
+            language="javascript"
+            style={darcula}
+            showLineNumbers
+            wrapLongLines
+          >
+            {modalViewSourceContent}
+          </SyntaxHighlighter>
+        </>
+      ),
+    },
   ];
 
   const onTabChange = (key) => {
@@ -219,6 +274,7 @@ function App() {
         {
           checkedColumns: columnList,
           checkedMultiColumn: checkedMultiColumn,
+          checkedModalUseState: checkedModalUseState,
         }
       )
       .then((response) => {
@@ -264,6 +320,7 @@ function App() {
         params: {
           checkedColumns: checkedColumns,
           checkedMultiColumn: checkedMultiColumn,
+          checkedModalUseState: checkedModalUseState,
         },
       })
       .then((response) => {
@@ -273,11 +330,15 @@ function App() {
           formStoreContent,
           formViewContent,
           detailViewContent,
+          modalFormContent,
+          modalViewContent,
         } = sourceInfo;
         setListSourceContent(listComponentContent);
         setFormStoreSourceContent(formStoreContent);
         setFormViewSourceContent(formViewContent);
         setDetailViewSourceContent(detailViewContent);
+        setModalFormSourceContent(modalFormContent);
+        setModalViewSourceContent(modalViewContent);
       });
   };
 
@@ -374,6 +435,12 @@ function App() {
             value={checkedMultiColumn}
           >
             2열 반영
+          </Checkbox>
+          <Checkbox
+            onChange={(checekd) => setCheckedModalUseState(checekd)}
+            value={checkedModalUseState}
+          >
+            모달 useState 적용
           </Checkbox>
         </Flex>
         <Table
