@@ -26,7 +26,8 @@ import "./App.css";
 const componentTypeOptions = [
   { value: "text", label: "text" },
   { value: "number", label: "number" },
-  { value: "select", label: "code" },
+  { value: "select", label: "select" },
+  { value: "code", label: "code" },
   { value: "textarea", label: "textarea" },
   { value: "editor", label: "editor" },
   { value: "datepicker", label: "datepicker" },
