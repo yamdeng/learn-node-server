@@ -1,29 +1,47 @@
-import { Button, Flex, Select, Table, Tabs } from "antd";
+import { Button, Flex, Select, Table, Tabs, Checkbox } from "antd";
 import axios from "axios";
 import { useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import AsyncSelect from "react-select/async";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { darcula } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { useImmer } from "use-immer";
 import "./App.css";
 
-const getQueryStringByArray = (parameterName, arr) => {
-  let result = "";
-  if (arr && arr.length) {
-    for (let arrIndex = 0; arrIndex < arr.length; arrIndex++) {
-      const stringValue = arr[arrIndex];
-      if (arrIndex === 0) {
-        result =
-          result + `?${encodeURIComponent(parameterName)}=` + stringValue;
-      } else {
-        result =
-          result + `&${encodeURIComponent(parameterName)}=` + stringValue;
-      }
-    }
-  }
+// text, numnber, select, code, textarea, editor, datepicker, timepicker, checkbox, radio, user-select-input, dept-select-input, aut-complete, tree-select
+const componentTypeOptions = [
+  { value: "text", label: "text" },
+  { value: "number", label: "number" },
+  { value: "select", label: "code" },
+  { value: "textarea", label: "textarea" },
+  { value: "editor", label: "editor" },
+  { value: "datepicker", label: "datepicker" },
+  { value: "timepicker", label: "timepicker" },
+  { value: "checkbox", label: "checkbox" },
+  { value: "radio", label: "radio" },
+  { value: "user-select-input", label: "사용자검색 input" },
+  { value: "dept-select-input", label: "부서검색 input" },
+  { value: "auto-complete", label: "AutoComplete" },
+  { value: "tree-select", label: "트리 select" },
+];
 
-  return result;
-};
+// const getQueryStringByArray = (parameterName, arr) => {
+//   let result = "";
+//   if (arr && arr.length) {
+//     for (let arrIndex = 0; arrIndex < arr.length; arrIndex++) {
+//       const stringValue = arr[arrIndex];
+//       if (arrIndex === 0) {
+//         result =
+//           result + `?${encodeURIComponent(parameterName)}=` + stringValue;
+//       } else {
+//         result =
+//           result + `&${encodeURIComponent(parameterName)}=` + stringValue;
+//       }
+//     }
+//   }
+
+//   return result;
+// };
 
 const loadOptions = (inputValue, callback) => {
   console.log("on load options function");
@@ -50,13 +68,13 @@ function App() {
   const [selectTableName, setSelectTableName] = useState("");
   const [selectGenerateType, setSelectGenerateType] = useState("all");
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [columnList, setColumnList] = useState([]);
-
+  const [columnList, setColumnList] = useImmer([]);
   const [activeTabKey, setActiveTabKey] = useState("1");
   const [listSourceContent, setListSourceContent] = useState("");
   const [formStoreSourceContent, setFormStoreSourceContent] = useState("");
   const [formViewSourceContent, setFormViewSourceContent] = useState("");
   const [detailViewSourceContent, setDetailViewSourceContent] = useState("");
+  const [checkedMultiColumn, setCheckedMultiColumn] = useState(false);
 
   const tabItems = [
     {
@@ -194,33 +212,37 @@ function App() {
       });
   };
 
-  const fileCreate = () => {
+  const fileDownload = () => {
     axios
-      .get(
-        `/api/generate/${selectTableName}/${selectGenerateType}/fileCreate`,
+      .post(
+        `/api/generate/${selectTableName}/${selectGenerateType}/fileDownload`,
         {
-          params: {
-            checkedColumns: selectedRowKeys,
-          },
+          checkedColumns: columnList,
+          checkedMultiColumn: checkedMultiColumn,
         }
       )
-      .then(() => {
-        alert("파일 생성 완료!");
-      });
-  };
+      .then((response) => {
+        const disposition = response.headers["content-disposition"];
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const a = document.createElement("a");
 
-  const fileDownload = () => {
-    const checkedColumnParameters = getQueryStringByArray(
-      "checkedColumns",
-      selectedRowKeys
-    );
-    const mode = import.meta.env.MODE;
-    let downloadUrl = `http://localhost:3000/api/generate/${selectTableName}/${selectGenerateType}/fileDownload${checkedColumnParameters}`;
-    if (mode === "production") {
-      downloadUrl = `/api/generate/${selectTableName}/${selectGenerateType}/fileDownload${checkedColumnParameters}`;
-    }
-
-    window.open(downloadUrl);
+        let fileName = "downloaded_file";
+        if (disposition) {
+          const fileNameMatch = disposition.match(/filename="(.+)"/);
+          if (fileNameMatch.length === 2) {
+            fileName = fileNameMatch[1];
+          }
+        }
+        a.style.display = "none";
+        a.href = url;
+        a.download = fileName; // 다운로드될 파일 이름
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url); // 메모리
+      })
+      .catch((error) =>
+        console.error("There was a problem with the download:", error)
+      );
   };
 
   const changeGenerateType = (value) => {
@@ -228,10 +250,20 @@ function App() {
   };
 
   const refreshSource = () => {
+    const checkedColumns = columnList.filter((columnInfo) => {
+      const searchIndex = selectedRowKeys.findIndex(
+        (key) => key === columnInfo.column_name_original
+      );
+      if (searchIndex !== -1) {
+        return true;
+      }
+      return false;
+    });
     axios
       .get(`/api/generate/${selectTableName}`, {
         params: {
-          checkedColumns: selectedRowKeys,
+          checkedColumns: checkedColumns,
+          checkedMultiColumn: checkedMultiColumn,
         },
       })
       .then((response) => {
@@ -247,6 +279,12 @@ function App() {
         setFormViewSourceContent(formViewContent);
         setDetailViewSourceContent(detailViewContent);
       });
+  };
+
+  const changeComponentType = (index, value) => {
+    setColumnList((draft) => {
+      draft[index].componentType = value;
+    });
   };
 
   const columns = [
@@ -275,6 +313,22 @@ function App() {
       dataIndex: "column_name",
       key: "column_name",
     },
+    {
+      title: "유형",
+      dataIndex: "comoonentType",
+      key: "comoonentType",
+      render: (_, record, index) => {
+        const { componentType } = record;
+        return (
+          <Select
+            value={componentType}
+            style={{ width: 120 }}
+            onChange={(value) => changeComponentType(index, value)}
+            options={componentTypeOptions}
+          />
+        );
+      },
+    },
   ];
 
   return (
@@ -302,14 +356,6 @@ function App() {
           <Button
             type="primary"
             danger
-            onClick={fileCreate}
-            disabled={!selectTableName || !selectedRowKeys.length}
-          >
-            파일생성
-          </Button>
-          <Button
-            type="primary"
-            danger
             onClick={fileDownload}
             disabled={!selectTableName || !selectedRowKeys.length}
           >
@@ -323,6 +369,12 @@ function App() {
           >
             소스조회
           </Button>
+          <Checkbox
+            onChange={(checekd) => setCheckedMultiColumn(checekd)}
+            value={checkedMultiColumn}
+          >
+            2열 반영
+          </Checkbox>
         </Flex>
         <Table
           rowKey={"column_name_original"}
