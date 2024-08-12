@@ -337,12 +337,10 @@ function App() {
       return false;
     });
     axios
-      .get(`/api/generate/${selectTableName}`, {
-        params: {
-          checkedColumns: checkedColumns,
-          checkedMultiColumn: checkedMultiColumn,
-          checkedModalUseState: checkedModalUseState,
-        },
+      .post(`/api/generate/${selectTableName}`, {
+        checkedColumns: checkedColumns,
+        checkedMultiColumn: checkedMultiColumn,
+        checkedModalUseState: checkedModalUseState,
       })
       .then((response) => {
         const sourceInfo = response.data;
