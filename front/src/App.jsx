@@ -1,3 +1,17 @@
+import {
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { Button, Flex, Select, Table, Tabs, Checkbox, Input } from "antd";
 import axios from "axios";
 import { useState } from "react";
@@ -7,6 +21,41 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { darcula } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { useImmer } from "use-immer";
 import "./App.css";
+
+const Row = (props) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: props["data-row-key"],
+  });
+
+  const style = {
+    ...props.style,
+    transform: CSS.Translate.toString(transform),
+    transition,
+    cursor: "move",
+    ...(isDragging
+      ? {
+          position: "relative",
+          zIndex: 0,
+        }
+      : {}),
+  };
+  return (
+    <tr
+      {...props}
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+    />
+  );
+};
 
 // import AppTextInput from '@/components/common/AppTextInput';
 // import AppSelect from '@/components/common/AppSelect';
@@ -436,6 +485,30 @@ function App() {
     },
   ];
 
+  // drag
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        // https://docs.dndkit.com/api-documentation/sensors/pointer#activation-constraints
+        distance: 1,
+      },
+    })
+  );
+  const onDragEnd = ({ active, over }) => {
+    if (active.id !== over?.id) {
+      setColumnList((prev) => {
+        const activeIndex = prev.findIndex(
+          (i) => i.column_name_original === active.id
+        );
+        const overIndex = prev.findIndex(
+          (i) => i.column_name_original === over?.id
+        );
+        return arrayMove(prev, activeIndex, overIndex);
+      });
+    }
+  };
+
   return (
     <>
       <div>
@@ -495,13 +568,32 @@ function App() {
             모달 useState 적용
           </Checkbox>
         </Flex>
-        <Table
-          rowKey={"column_name_original"}
-          rowSelection={rowSelection}
-          dataSource={columnList}
-          columns={columns}
-          pagination={false}
-        />
+
+        <DndContext
+          sensors={sensors}
+          modifiers={[restrictToVerticalAxis]}
+          onDragEnd={onDragEnd}
+        >
+          <SortableContext
+            // rowKey array
+            items={columnList.map((i) => i.column_name_original)}
+            strategy={verticalListSortingStrategy}
+          >
+            <Table
+              components={{
+                body: {
+                  row: Row,
+                },
+              }}
+              rowKey={"column_name_original"}
+              rowSelection={rowSelection}
+              dataSource={columnList}
+              columns={columns}
+              pagination={false}
+            />
+          </SortableContext>
+        </DndContext>
+
         <Tabs
           activeKey={activeTabKey}
           items={tabItems}
