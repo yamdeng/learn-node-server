@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import {
   DndContext,
   PointerSensor,
@@ -12,7 +13,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Button, Flex, Select, Table, Tabs, Checkbox, Input } from "antd";
+import { Button, Checkbox, Flex, Input, Select, Table, Tabs } from "antd";
 import axios from "axios";
 import { useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
@@ -89,25 +90,8 @@ const componentTypeOptions = [
   { value: "dept-select-input", label: "부서검색 input" },
   { value: "auto-complete", label: "AutoComplete" },
   { value: "tree-select", label: "트리 select" },
+  { value: "search-input", label: "search input" },
 ];
-
-// const getQueryStringByArray = (parameterName, arr) => {
-//   let result = "";
-//   if (arr && arr.length) {
-//     for (let arrIndex = 0; arrIndex < arr.length; arrIndex++) {
-//       const stringValue = arr[arrIndex];
-//       if (arrIndex === 0) {
-//         result =
-//           result + `?${encodeURIComponent(parameterName)}=` + stringValue;
-//       } else {
-//         result =
-//           result + `&${encodeURIComponent(parameterName)}=` + stringValue;
-//       }
-//     }
-//   }
-
-//   return result;
-// };
 
 const loadOptions = (inputValue, callback) => {
   console.log("on load options function");
@@ -142,8 +126,10 @@ function App() {
   const [detailViewSourceContent, setDetailViewSourceContent] = useState("");
   const [modalFormSourceContent, setModalFormSourceContent] = useState("");
   const [modalViewSourceContent, setModalViewSourceContent] = useState("");
+  const [searchFormSourceContent, setSearchFormSourceContent] = useState("");
   const [checkedMultiColumn, setCheckedMultiColumn] = useState(false);
   const [checkedModalUseState, setCheckedModalUseState] = useState(false);
+  const [checkedSearchFormDetail, setCheckedSearchFormDetail] = useState(false);
 
   const tabItems = [
     {
@@ -302,6 +288,32 @@ function App() {
         </>
       ),
     },
+    {
+      key: "7",
+      label: "검색폼",
+      children: (
+        <>
+          <CopyToClipboard
+            text={searchFormSourceContent}
+            onCopy={() => alert("검색폼 복사 완료")}
+          >
+            <div style={{ textAlign: "left" }}>
+              <Button type="primary" danger>
+                검색폼 복사
+              </Button>
+            </div>
+          </CopyToClipboard>
+          <SyntaxHighlighter
+            language="javascript"
+            style={darcula}
+            showLineNumbers
+            wrapLongLines
+          >
+            {searchFormSourceContent}
+          </SyntaxHighlighter>
+        </>
+      ),
+    },
   ];
 
   const onTabChange = (key) => {
@@ -336,6 +348,7 @@ function App() {
         setDetailViewSourceContent("");
         setModalFormSourceContent("");
         setModalViewSourceContent("");
+        setSearchFormSourceContent("");
       });
   };
 
@@ -347,6 +360,7 @@ function App() {
           checkedColumns: columnList,
           checkedMultiColumn: checkedMultiColumn,
           checkedModalUseState: checkedModalUseState,
+          checkedSearchFormDetail: checkedSearchFormDetail,
         },
         { responseType: "arraybuffer" }
       )
@@ -393,6 +407,7 @@ function App() {
         checkedColumns: checkedColumns,
         checkedMultiColumn: checkedMultiColumn,
         checkedModalUseState: checkedModalUseState,
+        checkedSearchFormDetail: checkedSearchFormDetail,
       })
       .then((response) => {
         const sourceInfo = response.data;
@@ -403,6 +418,7 @@ function App() {
           detailViewContent,
           modalFormContent,
           modalViewContent,
+          searchFormContent,
         } = sourceInfo;
         setListSourceContent(listComponentContent);
         setFormStoreSourceContent(formStoreContent);
@@ -410,6 +426,7 @@ function App() {
         setDetailViewSourceContent(detailViewContent);
         setModalFormSourceContent(modalFormContent);
         setModalViewSourceContent(modalViewContent);
+        setSearchFormSourceContent(searchFormContent);
       });
   };
 
@@ -459,6 +476,7 @@ function App() {
         const { componentType } = record;
         return (
           <Select
+            showSearch
             value={componentType}
             style={{ width: 150 }}
             onChange={(value) => changeComponentType(index, value)}
@@ -485,12 +503,10 @@ function App() {
     },
   ];
 
-  // drag
-
+  // drag start
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        // https://docs.dndkit.com/api-documentation/sensors/pointer#activation-constraints
         distance: 1,
       },
     })
@@ -520,17 +536,19 @@ function App() {
         <br />
         <Flex wrap gap="small">
           <Select
+            showSearch
             value={selectGenerateType}
             style={{ width: 120 }}
             onChange={changeGenerateType}
             options={[
               { value: "all", label: "전체" },
               { value: "list", label: "목록" },
-              { value: "formStore", label: "form store" },
-              { value: "formView", label: "form view" },
-              { value: "detailView", label: "detail view" },
-              { value: "modalForm", label: "modal form" },
-              { value: "modalView", label: "modal view" },
+              { value: "formStore", label: "폼(store)" },
+              { value: "formView", label: "폼(화면)" },
+              { value: "detailView", label: "상세(화면)" },
+              { value: "modalForm", label: "모달폼(화면)" },
+              { value: "modalView", label: "모달상세(화면)" },
+              { value: "searchForm", label: "검색폼" },
             ]}
           />
           <Button
@@ -566,6 +584,15 @@ function App() {
             value={checkedModalUseState}
           >
             모달 useState 적용
+          </Checkbox>
+          <Checkbox
+            onChange={(event) => {
+              const checked = event.target.checked;
+              setCheckedSearchFormDetail(checked);
+            }}
+            value={checkedSearchFormDetail}
+          >
+            상세펼치기
           </Checkbox>
         </Flex>
 
