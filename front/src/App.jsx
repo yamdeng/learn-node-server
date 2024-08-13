@@ -298,7 +298,8 @@ function App() {
           checkedColumns: columnList,
           checkedMultiColumn: checkedMultiColumn,
           checkedModalUseState: checkedModalUseState,
-        }
+        },
+        { responseType: "arraybuffer" }
       )
       .then((response) => {
         const disposition = response.headers["content-disposition"];
