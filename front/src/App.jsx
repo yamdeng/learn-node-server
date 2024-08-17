@@ -129,6 +129,7 @@ function App() {
   const [searchFormSourceContent, setSearchFormSourceContent] = useState("");
   const [checkedMultiColumn, setCheckedMultiColumn] = useState(false);
   const [checkedModalUseState, setCheckedModalUseState] = useState(false);
+  const [checkedInnerFormStore, setCheckedInnerFormStore] = useState(false);
   const [checkedSearchFormDetail, setCheckedSearchFormDetail] = useState(false);
 
   const tabItems = [
@@ -360,6 +361,7 @@ function App() {
           checkedColumns: columnList,
           checkedMultiColumn: checkedMultiColumn,
           checkedModalUseState: checkedModalUseState,
+          checkedInnerFormStore: checkedInnerFormStore,
           checkedSearchFormDetail: checkedSearchFormDetail,
         },
         { responseType: "arraybuffer" }
@@ -407,6 +409,7 @@ function App() {
         checkedColumns: checkedColumns,
         checkedMultiColumn: checkedMultiColumn,
         checkedModalUseState: checkedModalUseState,
+        checkedInnerFormStore: checkedInnerFormStore,
         checkedSearchFormDetail: checkedSearchFormDetail,
       })
       .then((response) => {
@@ -575,6 +578,15 @@ function App() {
             value={checkedMultiColumn}
           >
             2열 반영
+          </Checkbox>
+          <Checkbox
+            onChange={(event) => {
+              const checked = event.target.checked;
+              setCheckedInnerFormStore(checked);
+            }}
+            value={checkedInnerFormStore}
+          >
+            formstore 같이
           </Checkbox>
           <Checkbox
             onChange={(event) => {
