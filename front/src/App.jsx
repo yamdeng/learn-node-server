@@ -58,21 +58,6 @@ const Row = (props) => {
   );
 };
 
-// import AppTextInput from '@/components/common/AppTextInput';
-// import AppSelect from '@/components/common/AppSelect';
-// import AppCodeSelect from '@/components/common/AppCodeSelect';
-// import AppTextArea from '@/components/common/AppTextArea';
-// import AppEditor from '@/components/common/AppEditor';
-// import AppDatePicker from '@/components/common/AppDatePicker';
-// import AppTimePicker from '@/components/common/AppTimePicker';
-// import AppCheckbox from '@/components/common/AppCheckbox';
-// import AppRadio from '@/components/common/AppRadio';
-// import AppUserSelectInput from '@/components/common/AppUserSelectInput';
-// import AppDeptSelectInput from '@/components/common/AppDeptSelectInput';
-// import AppAutoComplete from '@/components/common/AppAutoComplete';
-// import AppTreeSelect from '@/components/common/AppTreeSelect';
-
-// text, numnber, select, code, textarea, editor, datepicker, timepicker, checkbox, radio, user-select-input, dept-select-input, auto-complete, tree-select
 const componentTypeOptions = [
   { value: "text", label: "text" },
   { value: "number", label: "number" },
@@ -82,6 +67,7 @@ const componentTypeOptions = [
   { value: "editor", label: "editor" },
   { value: "datepicker", label: "datepicker" },
   { value: "timepicker", label: "timepicker" },
+  { value: "rangepicker", label: "rangepicker" },
   { value: "checkbox", label: "checkbox" },
   { value: "checkboxgroup", label: "checkboxgroup" },
   { value: "radio", label: "radio" },
